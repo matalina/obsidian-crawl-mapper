@@ -3,7 +3,7 @@
  * Start map entry via `option start-position` / `option city-start` (see text-mapper parser).
  */
 
-import type { CityAxis, CityIntersection, CityJunctionDef, CityStartAnchor, CityStreet } from './types';
+import type { CityIntersection, CityJunctionDef, CityStartAnchor, CityStreet } from './types';
 import { resolveCityJunctionAttachments } from './junction-resolve';
 
 const JUNCTION_KINDS = new Set<CityIntersection>(['cross', 't', 'straight', 'corner', 'dead']);
@@ -11,7 +11,7 @@ const JUNCTION_KINDS = new Set<CityIntersection>(['cross', 't', 'straight', 'cor
 export function parseOptionStringToCityStartAnchor(raw: string): CityStartAnchor | null {
   const parts = raw.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return null;
-  const v = parts[0]!;
+  const v = parts[0];
   const map: Record<string, CityStartAnchor> = {
     center: 'center',
     'center-vertical': 'center-vertical',
@@ -42,7 +42,7 @@ export function parseCityStartOptionFromText(text: string): CityStartAnchor | nu
     if (t.startsWith('#')) continue;
     const opt = t.match(/^option\s+(start-position|city-start)\s+(.+)$/i);
     if (!opt) continue;
-    return parseOptionStringToCityStartAnchor(opt[2]!.trim());
+    return parseOptionStringToCityStartAnchor(opt[2].trim());
   }
   return null;
 }
@@ -65,8 +65,8 @@ function parseFacadeBrackets(line: string): { left: string[]; right: string[]; r
   const bracketRe = /\[\s*([LR])\s*([^\]]*)\]/gi;
   let m: RegExpExecArray | null;
   while ((m = bracketRe.exec(line)) !== null) {
-    const side = m[1]!.toUpperCase();
-    const inner = m[2]!.trim();
+    const side = m[1].toUpperCase();
+    const inner = m[2].trim();
     const parts = inner.length ? tokenizeLine(inner) : [];
     if (side === 'L') {
       left.push(...parts);
@@ -105,7 +105,7 @@ function isTCompassTriple(keys: string[]): boolean {
   let pairs = 0;
   for (let i = 0; i < ks.length; i++) {
     for (let j = i + 1; j < ks.length; j++) {
-      if (oppositeCompass(ks[i]!) === ks[j]) pairs++;
+      if (oppositeCompass(ks[i]) === ks[j]) pairs++;
     }
   }
   return pairs === 1;
@@ -126,8 +126,8 @@ function validateJunctionKindAgainstArms(
     }
     case 'straight': {
       if (keys.length !== 2) return false;
-      const a = keys[0]!.toLowerCase();
-      const b = keys[1]!.toLowerCase();
+      const a = keys[0].toLowerCase();
+      const b = keys[1].toLowerCase();
       return oppositeCompass(a) === b;
     }
     case 'corner':
@@ -151,23 +151,23 @@ export function parseJunctionLine(line: string): CityJunctionDef | null {
   const m = t.match(/^@([A-Za-z_][A-Za-z0-9_]*)\s+(.+)$/);
   if (!m) return null;
 
-  const id = m[1]!;
-  const body = m[2]!.trim();
+  const id = m[1];
+  const body = m[2].trim();
   if (/^[A-Za-z_][A-Za-z0-9_]*\s*:\s*\d/.test(body)) return null;
 
   const tokens = tokenizeLine(body);
   if (tokens.length < 2) return null;
 
-  const kindTok = tokens[0]!.toLowerCase();
+  const kindTok = tokens[0].toLowerCase();
   if (!JUNCTION_KINDS.has(kindTok as CityIntersection)) return null;
   const kind = kindTok as CityIntersection;
 
   const arms: Partial<Record<string, string | null>> = {};
   for (let i = 1; i < tokens.length; i++) {
-    const tok = tokens[i]!;
+    const tok = tokens[i];
     const am = tok.match(ARM_CLAUSE_RE);
     if (!am) return null;
-    const key = am[1]!.toLowerCase();
+    const key = am[1].toLowerCase();
     const rhs = (am[2] ?? '').trim();
     if (arms[key] !== undefined) return null;
     arms[key] = rhs.length ? normalizeId(rhs) : null;
@@ -203,13 +203,13 @@ export function parseStreetLine(line: string): CityStreet | null {
   const tokens = tokenizeLine(restLine);
   if (tokens.length !== 2) return null;
 
-  const lenStr = tokens[0]!;
+  const lenStr = tokens[0];
   const length = parseInt(lenStr, 10);
   if (!Number.isFinite(length) || length < 1) return null;
 
-  const axisRaw = tokens[1]!.toLowerCase();
+  const axisRaw = tokens[1].toLowerCase();
   if (axisRaw !== 'ns' && axisRaw !== 'ew') return null;
-  const axis = axisRaw as CityAxis;
+  const axis = axisRaw;
 
   const id = normalizeId(name);
   return {

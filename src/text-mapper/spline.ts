@@ -119,7 +119,8 @@ export class Spline {
             ];
         }
 
-        let min, best;
+        let min: number | undefined;
+        let best: Point | undefined;
 
         for (let i = 0; i < 6; i++) {
             // make a new guess
@@ -139,7 +140,8 @@ export class Spline {
             }
         }
 
-        return best;
+        // All six neighbours are tried, so best is always set
+        return best!;
     }
 
     partway(from: Point, to: Point, lerp = 1): Point {
@@ -195,7 +197,9 @@ export class Spline {
                 }
             }
         } else {
-            let current, next;
+            // An open path has at least two points (one point counts as closed)
+            let current: Point | undefined;
+            let next: Point | undefined;
             for (let i = 0; i < points.length - 1; i++) {
                 current = points[i];
                 next = points[i + 1];
@@ -212,7 +216,7 @@ export class Spline {
                 }
             }
             // end with a little stub
-            path += " L" + this.partway(current, next, 0.7).toString();
+            path += " L" + this.partway(current!, next!, 0.7).toString();
         }
 
         svgEl.createSvg("path", {

@@ -94,7 +94,7 @@ function isTwoJunctionThroughRoot(root: CityStreet): boolean {
 
 /** First street line in document order is the layout root. */
 function pickRootStreet(streets: CityStreet[]): CityStreet | null {
-  return streets.length === 0 ? null : streets[0]!;
+  return streets.length === 0 ? null : streets[0];
 }
 
 function applyEndKindFromJunction(streets: CityStreet[], junctions: CityJunctionDef[]): void {
@@ -130,14 +130,14 @@ export function resolveCityJunctionAttachments(
           error: `Junction "${j.id}": unknown street "${raw}"`,
         };
       }
-      if (st.id === root.id && !st.graphEnd && rootExitMatchesAnchor(planAnchor, j.kind, exitKey)) {
+      if (st.id === root?.id && !st.graphEnd && rootExitMatchesAnchor(planAnchor, j.kind, exitKey)) {
         st.graphEnd = { junctionId: j.id, exitKey };
       }
     }
     for (const [exitKey, raw] of entries) {
       const tid = normalizeId(raw);
       const st = outById.get(tid)!;
-      if (st.id === root.id && st.graphEnd?.junctionId === j.id && st.graphEnd.exitKey === exitKey) {
+      if (st.id === root?.id && st.graphEnd?.junctionId === j.id && st.graphEnd.exitKey === exitKey) {
         continue;
       }
       if (!st.graphStart) {
@@ -158,7 +158,7 @@ export function resolveCityJunctionAttachments(
   /** Branch-only streets that attach at a junction but go nowhere else are dead ends. */
   for (const s of out) {
     if (junctions.length === 0) break;
-    if (s.id === root.id) continue;
+    if (s.id === root?.id) continue;
     if (s.graphStart && !s.graphEnd) {
       s.endKind = 'dead';
     }
@@ -166,7 +166,7 @@ export function resolveCityJunctionAttachments(
 
   for (const s of out) {
     if (junctions.length === 0) continue;
-    if (s.id === root.id) {
+    if (s.id === root?.id) {
       if (isOpenEntryOppositeBranchRoot(s, junctions, planAnchor)) {
         s.endKind = 'dead';
         continue;

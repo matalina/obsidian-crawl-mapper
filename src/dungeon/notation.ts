@@ -43,25 +43,25 @@ function parseBracketInner(inner: string): BracketSlots | null {
     }
     const recvOnlyColon = t.match(/^:(\d+)$/);
     if (recvOnlyColon) {
-        return { receiveDoorSlot: parseInt(recvOnlyColon[1]!, 10) };
+        return { receiveDoorSlot: parseInt(recvOnlyColon[1], 10) };
     }
     const slotPair = t.match(/^(\d+):(\d+)$/);
     if (slotPair) {
         return {
-            doorSlot: parseInt(slotPair[1]!, 10),
-            receiveDoorSlot: parseInt(slotPair[2]!, 10),
+            doorSlot: parseInt(slotPair[1], 10),
+            receiveDoorSlot: parseInt(slotPair[2], 10),
         };
     }
     const slotOne = t.match(/^(\d+)$/);
     if (slotOne) {
-        return { doorSlot: parseInt(slotOne[1]!, 10) };
+        return { doorSlot: parseInt(slotOne[1], 10) };
     }
     const tagRe = new RegExp(`^(${DOOR_TAG})(.*)$`, "i");
     const tm = t.match(tagRe);
     if (!tm) {
         return null;
     }
-    const door = tm[1]!.toLowerCase() as DoorType;
+    const door = tm[1].toLowerCase() as DoorType;
     const rest = (tm[2] ?? "").trim();
     if (!rest) {
         return { door };
@@ -70,17 +70,17 @@ function parseBracketInner(inner: string): BracketSlots | null {
     if (srcRecv) {
         return {
             door,
-            doorSlot: parseInt(srcRecv[1]!, 10),
-            receiveDoorSlot: parseInt(srcRecv[2]!, 10),
+            doorSlot: parseInt(srcRecv[1], 10),
+            receiveDoorSlot: parseInt(srcRecv[2], 10),
         };
     }
     const recvTagged = rest.match(/^:(\d+)$/);
     if (recvTagged) {
-        return { door, receiveDoorSlot: parseInt(recvTagged[1]!, 10) };
+        return { door, receiveDoorSlot: parseInt(recvTagged[1], 10) };
     }
     const srcOnly = rest.match(/^(\d+)$/);
     if (srcOnly) {
-        return { door, doorSlot: parseInt(srcOnly[1]!, 10) };
+        return { door, doorSlot: parseInt(srcOnly[1], 10) };
     }
     return null;
 }
@@ -158,7 +158,7 @@ export function parseEdge(token: string): ParsedEdge | null {
 
     const mr = token.match(bracketRev);
     if (mr) {
-        const dir = mr[1]!.toUpperCase() as ExitDirection;
+        const dir = mr[1].toUpperCase() as ExitDirection;
         const innerParsed = parseBracketInner(mr[2] ?? "");
         if (!innerParsed) {
             return null;
@@ -174,7 +174,7 @@ export function parseEdge(token: string): ParsedEdge | null {
 
     const mg = token.match(bracketReg);
     if (mg) {
-        const dir = mg[1]!.toUpperCase() as ExitDirection;
+        const dir = mg[1].toUpperCase() as ExitDirection;
         const innerParsed = parseBracketInner(mg[2] ?? "");
         if (!innerParsed) {
             return null;
@@ -190,8 +190,8 @@ export function parseEdge(token: string): ParsedEdge | null {
 
     const bare = token.match(/^(n|s|e|w)(->|=>)(.*)$/i);
     if (bare) {
-        const dir = bare[1]!.toUpperCase() as ExitDirection;
-        const arrow = bare[2]!;
+        const dir = bare[1].toUpperCase() as ExitDirection;
+        const arrow = bare[2];
         const target = (bare[3] ?? "").trim() || null;
         return {
             dir,
@@ -214,8 +214,8 @@ export function parseRoomLine(line: string): Room | null {
     const rest = trimmed.slice(colonIdx + 1).trim();
     const dimMatch = rest.match(/^(\d+)[x,](\d+)\s*(.*)$/i);
     if (!dimMatch) return null;
-    const width = parseInt(dimMatch[1]!, 10);
-    const height = parseInt(dimMatch[2]!, 10);
+    const width = parseInt(dimMatch[1], 10);
+    const height = parseInt(dimMatch[2], 10);
     const tail = (dimMatch[3] ?? "").trim();
     const exits = createEmptyExits();
     const tokens = tail.split(/\s+(?=[nsew](?:[-=]|\[))/i).filter(Boolean);

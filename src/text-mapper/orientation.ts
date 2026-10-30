@@ -42,10 +42,10 @@ export class Orientation {
     viewbox(regions: Region[]): number[] {
         const xMargin = 60 + this.dx;
         const yMargin = 60 + this.dy;
-        let min_x_overall = undefined;
-        let max_x_overall = undefined;
-        let min_y_overall = undefined;
-        let max_y_overall = undefined;
+        let min_x_overall: number | undefined = undefined;
+        let max_x_overall: number | undefined = undefined;
+        let min_y_overall: number | undefined = undefined;
+        let max_y_overall: number | undefined = undefined;
 
         const pixels: Point[] = regions.map((r) =>
             this.pixels(new Point(r.x, r.y), 0, 0)
@@ -67,10 +67,10 @@ export class Orientation {
         }
 
         return [
-            min_x_overall - xMargin,
-            min_y_overall - yMargin,
-            max_x_overall + xMargin,
-            max_y_overall + yMargin,
+            (min_x_overall ?? 0) - xMargin,
+            (min_y_overall ?? 0) - yMargin,
+            (max_x_overall ?? 0) + xMargin,
+            (max_y_overall ?? 0) + yMargin,
         ];
     }
 

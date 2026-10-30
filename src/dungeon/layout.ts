@@ -185,15 +185,15 @@ function dequeueBySourceOrder(q: Room[], sourceOrder: Map<string, number>): Room
         throw new Error("dequeueBySourceOrder: empty queue");
     }
     let minI = 0;
-    let minO = sourceOrder.get(q[0]!.id) ?? Infinity;
+    let minO = sourceOrder.get(q[0].id) ?? Infinity;
     for (let i = 1; i < q.length; i++) {
-        const o = sourceOrder.get(q[i]!.id) ?? Infinity;
+        const o = sourceOrder.get(q[i].id) ?? Infinity;
         if (o < minO) {
             minO = o;
             minI = i;
         }
     }
-    return q.splice(minI, 1)[0]!;
+    return q.splice(minI, 1)[0];
 }
 
 function primaryConflictBySourceOrder(

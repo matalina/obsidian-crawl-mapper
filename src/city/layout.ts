@@ -107,7 +107,7 @@ export function effectiveCornerTurn(
   if (armKeys.length !== 2) return null;
   const others = armKeys.filter((k) => k.toLowerCase() !== pk);
   if (others.length !== 1) return null;
-  const otherH = exitKeyToWalkHeading('corner', incoming, others[0]!);
+  const otherH = exitKeyToWalkHeading('corner', incoming, others[0]);
   if (!otherH) return null;
   if (otherH === turnLeft(incoming)) return 'left';
   if (otherH === turnRight(incoming)) return 'right';
@@ -259,13 +259,13 @@ function pushFacadesForSide(
   const slice = filtered.slice(0, count);
   const indices = facadeSpineIndices(L, count);
   for (let i = 0; i < slice.length; i++) {
-    const k = indices[i]!;
+    const k = indices[i];
     const cx = startGX + dx * k;
     const cy = startGY + dy * k;
     const tcx = cx + 0.5;
     const tcy = cy + 0.5;
     facadeLabels.push({
-      text: slice[i]!,
+      text: slice[i],
       gx: tcx + perp.dx,
       gy: tcy + perp.dy,
       side,
@@ -282,20 +282,20 @@ interface QueueItem {
 
 /** First street line in document order (matches resolver root). */
 function pickRoot(streets: CityStreet[]): CityStreet | null {
-  return streets.length === 0 ? null : streets[0]!;
+  return streets.length === 0 ? null : streets[0];
 }
 
 function dequeueBySourceOrder(q: QueueItem[], sourceOrder: Map<string, number>): QueueItem {
   let minI = 0;
-  let minO = sourceOrder.get(q[0]!.id) ?? Infinity;
+  let minO = sourceOrder.get(q[0].id) ?? Infinity;
   for (let i = 1; i < q.length; i++) {
-    const o = sourceOrder.get(q[i]!.id) ?? Infinity;
+    const o = sourceOrder.get(q[i].id) ?? Infinity;
     if (o < minO) {
       minO = o;
       minI = i;
     }
   }
-  return q.splice(minI, 1)[0]!;
+  return q.splice(minI, 1)[0];
 }
 
 const CITY_LAYOUT_PAD = 3;

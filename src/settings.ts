@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, type SettingDefinitionItem } from 'obsidian';
 import type CrawlMapperPlugin from './main';
 
 export interface CrawlMapperSettings {
@@ -19,32 +19,32 @@ export class CrawlMapperSettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  display(): void {
-    const { containerEl } = this;
-    containerEl.empty();
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    return [
+      {
+        name: 'Save location',
+        desc: 'Folder where PNG exports are saved. Leave empty to save next to the current note.',
+        control: { type: 'text', key: 'saveLocation', placeholder: '_saved-maps' },
+      },
+      {
+        name: 'Show overlays',
+        desc: 'Show ring overlays (overlay-<color>-<ring> regions) on hex maps.',
+        control: { type: 'toggle', key: 'overlaysVisible' },
+      },
+    ];
+  }
 
-    new Setting(containerEl)
-      .setName('Save location')
-      .setDesc('Folder where PNG exports are saved. Leave empty to save next to the current note.')
-      .addText((text) =>
-        text
-          .setPlaceholder('_saved-maps')
-          .setValue(this.plugin.settings.saveLocation)
-          .onChange(async (value) => {
-            this.plugin.settings.saveLocation = value.trim().replace(/^\/+|\/+$/g, '');
-            await this.plugin.saveSettings();
-          }),
-      );
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    if (key === 'saveLocation') {
+      const raw = typeof value === 'string' ? value : '';
+      this.plugin.settings.saveLocation = raw.trim().replace(/^\/+|\/+$/g, '');
+      await this.plugin.saveSettings();
+      return;
+    }
 
-    new Setting(containerEl)
-      .setName('Show overlays')
-      .setDesc('Show ring overlays (overlay-<color>-<ring> regions) on hex maps.')
-      .addToggle((toggle) =>
-        toggle.setValue(this.plugin.settings.overlaysVisible).onChange(async (value) => {
-          this.plugin.settings.overlaysVisible = value;
-          await this.plugin.saveSettings();
-          this.plugin.activeMappers.forEach((mapper) => mapper.applyOverlayVisibility());
-        }),
-      );
+    await super.setControlValue(key, value);
+    if (key === 'overlaysVisible') {
+      this.plugin.activeMappers.forEach((mapper) => mapper.applyOverlayVisibility());
+    }
   }
 }

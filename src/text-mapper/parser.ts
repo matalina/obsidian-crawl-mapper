@@ -262,7 +262,7 @@ export class TextMapperParser {
         continue;
       }
       if (OPTION_REGEX.test(line)) {
-        const match = line.match(OPTION_REGEX);
+        const match = line.match(OPTION_REGEX)!;
         this.parseOption(match[1]);
       }
     }
@@ -340,25 +340,25 @@ export class TextMapperParser {
         const spline = this.parsePath(line);
         this.splines.push(spline);
       } else if (ATTRIBUTES_REGEX.test(line)) {
-        const match = line.match(ATTRIBUTES_REGEX);
+        const match = line.match(ATTRIBUTES_REGEX)!;
         this.attributes[match[1]] = this.parseAttributes(match[2]);
       } else if (XML_REGEX.test(line)) {
-        const match = line.match(XML_REGEX);
+        const match = line.match(XML_REGEX)!;
         this.def(match[1]);
       } else if (PATH_ATTRIBUTES_REGEX.test(line)) {
-        const match = line.match(PATH_ATTRIBUTES_REGEX);
+        const match = line.match(PATH_ATTRIBUTES_REGEX)!;
         this.pathAttributes[match[1]] = this.parseAttributes(match[2]);
       } else if (PATH_REGEX.test(line)) {
-        const match = line.match(PATH_REGEX);
+        const match = line.match(PATH_REGEX)!;
         this.path[match[1]] = match[2];
       } else if (TEXT_REGEX.test(line)) {
-        const match = line.match(TEXT_REGEX);
+        const match = line.match(TEXT_REGEX)!;
         this.textAttributes = this.parseAttributes(match[1]);
       } else if (GLOW_REGEX.test(line)) {
-        const match = line.match(GLOW_REGEX);
+        const match = line.match(GLOW_REGEX)!;
         this.glowAttributes = this.parseAttributes(match[1]);
       } else if (LABEL_REGEX.test(line)) {
-        const match = line.match(LABEL_REGEX);
+        const match = line.match(LABEL_REGEX)!;
         this.labelAttributes = this.parseAttributes(match[1]);
       }
     }
@@ -387,11 +387,11 @@ export class TextMapperParser {
   }
 
   private getResolvedCityStartAnchor(): CityStartAnchor {
-    const startPos = this.options['start-position'] as CityStartAnchor | undefined;
+    const startPos = this.options['start-position'];
     if (startPos != null) {
       return startPos;
     }
-    const fromOpt = this.options['city-start'] as CityStartAnchor | undefined;
+    const fromOpt = this.options['city-start'];
     if (fromOpt != null) {
       return fromOpt;
     }
@@ -415,9 +415,9 @@ export class TextMapperParser {
       };
     }
     let layout = computeCityLayout(this.cityStreets, anchor, this.cityJunctions);
-    const boundary = this.options.boundary as { w: number; h: number } | undefined;
+    const boundary = this.options.boundary;
     const rootSeg =
-      (this.cityStreets[0] && layout.segments.find((s) => s.street.id === this.cityStreets[0]!.id)) ??
+      (this.cityStreets[0] && layout.segments.find((s) => s.street.id === this.cityStreets[0].id)) ??
       layout.segments[0] ??
       null;
     if (boundary && rootSeg) {
@@ -448,11 +448,11 @@ export class TextMapperParser {
 
   parseRegion(line: string) {
     // hex
-    const match = line.match(HEX_REGEX);
+    const match = line.match(HEX_REGEX)!;
     const region = this.makeRegion(match[1], match[2], match[3] || '00');
     let rest = match[4];
     while (HEX_LABEL_REGEX.test(rest)) {
-      const labelMatch = rest.match(HEX_LABEL_REGEX);
+      const labelMatch = rest.match(HEX_LABEL_REGEX)!;
       region.label = labelMatch[1];
       region.size = labelMatch[2];
       rest = rest.replace(HEX_LABEL_REGEX, '');
@@ -464,7 +464,7 @@ export class TextMapperParser {
 
   parsePath(line: string) {
     // path
-    const match = line.match(SPLINE_REGEX);
+    const match = line.match(SPLINE_REGEX)!;
     const spline = this.makeSpline();
     spline.types = match[2];
     spline.label = match[3];
@@ -474,18 +474,18 @@ export class TextMapperParser {
     let rest = line;
      
     while (true) {
-      let segment: string;
+      let segment: string | null;
       [segment, rest] = this.splitPathSegments(rest);
       if (segment === null) {
         break;
       }
-      const pointMatch = segment.match(SPLINE_POINT_REGEX);
+      const pointMatch = segment.match(SPLINE_POINT_REGEX)!;
       spline.addPoint(pointMatch[1], pointMatch[2]);
     }
     return spline;
   }
 
-  private splitPathSegments(splinePath: string): [string, string] {
+  private splitPathSegments(splinePath: string): [string | null, string] {
     const match = splinePath.match(SPLINE_ELEMENT_SPLIT_REGEX);
     if (match === null) {
       return [null, splinePath];
@@ -682,7 +682,7 @@ export class TextMapperParser {
       }
       const t = DUNGEON_TILE_PX;
       const m = DUNGEON_MARGIN_TILES;
-      const boundary = this.options.boundary as { w: number; h: number } | undefined;
+      const boundary = this.options.boundary;
       if (boundary) {
         return {
           minX: -m * t,
@@ -706,7 +706,7 @@ export class TextMapperParser {
       }
       const t = CITY_TILE_PX;
       const m = DUNGEON_MARGIN_TILES;
-      const boundary = this.options.boundary as { w: number; h: number } | undefined;
+      const boundary = this.options.boundary;
       if (boundary) {
         return {
           minX: -m * t,
@@ -961,7 +961,7 @@ export class TextMapperParser {
       attr: { id: this.namespace('coordinates') },
     });
     for (const region of this.regions) {
-      region.svgCoordinates(coordsEl, this.orientation, this.textAttributes, this.options['coordinates-format']);
+      region.svgCoordinates(coordsEl, this.orientation, this.textAttributes, this.options['coordinates-format'] ?? '{X}{Y}');
     }
   }
 
@@ -1417,7 +1417,7 @@ export class TextMapperParser {
   private svgCity(svgEl: SVGElement): void {
     const layout = this.getCityLayoutResolved();
     const TILE = CITY_TILE_PX;
-    const boundary = this.options.boundary as { w: number; h: number } | undefined;
+    const boundary = this.options.boundary;
 
     const defsEl = svgEl.createSvg('defs');
     if (boundary) {
@@ -1727,7 +1727,7 @@ export class TextMapperParser {
       'stairs-right': 90,
     };
     if (d.doorType && d.doorType in stairRot) {
-      const angle = stairRot[d.doorType as DoorType] ?? 0;
+      const angle = stairRot[d.doorType] ?? 0;
       return angle !== 0 ? `rotate(${angle}, ${cx}, ${cy})` : undefined;
     }
     if (d.direction === 'E' || d.direction === 'W') {
@@ -1763,7 +1763,7 @@ export class TextMapperParser {
 
   private svgDungeon(svgEl: SVGElement): void {
     let layout = computeDungeonLayout(this.dungeonRooms);
-    const boundary = this.options.boundary as { w: number; h: number } | undefined;
+    const boundary = this.options.boundary;
     const entrance = this.dungeonRooms.find((r) => r.type === 'entrance');
     if (boundary && entrance) {
       layout = translateDungeonLayoutForBoundary(layout, boundary, entrance);

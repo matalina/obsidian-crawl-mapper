@@ -162,7 +162,7 @@ export class CrawlMap extends MarkdownRenderChild {
     this.svgEl = this.parser.svg(this.mapEl);
 
     // Get the actual DOM element
-    this.svgDomElement = this.mapEl.querySelector('svg') as SVGSVGElement;
+    this.svgDomElement = this.mapEl.querySelector('svg');
 
     // Get content bounds for pan limits
     this.contentBounds = this.parser.getContentBounds();
@@ -529,7 +529,7 @@ export class CrawlMap extends MarkdownRenderChild {
       const svgUrl = URL.createObjectURL(svgBlob);
 
       // Create canvas and draw SVG
-      const canvas = activeDocument.createElement('canvas');
+      const canvas = createEl('canvas');
 
       // Set dimensions and validate
       canvas.width = width;
