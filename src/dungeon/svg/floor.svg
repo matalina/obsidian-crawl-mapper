@@ -1,0 +1,5 @@
+<svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg">
+  <!-- One floor cell; pattern repeats every TILE px → room 5×3 = 5×3 cells, door = 1 cell. -->
+  <rect width="1" height="1" fill="#f4f1ea" />
+  <rect width="1" height="1" fill="none" stroke="#c8c4bc" stroke-width="0.06" />
+</svg>

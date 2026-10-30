@@ -1,0 +1,106 @@
+.crawl-mapper {
+    position: relative;
+}
+
+.crawl-mapper-svg {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.crawl-mapper-svg:active {
+    cursor: grabbing;
+}
+
+/* Map labels are internal-links; don't inherit the theme's link underline. */
+.crawl-mapper-svg text {
+    text-decoration: none;
+}
+
+/* --- Point crawl (map-type point): locations + connections --- */
+
+/* Connection lines: plain, undirected (no arrowheads). */
+.crawl-mapper-point-edge {
+    stroke: var(--text-muted, #888);
+    stroke-width: 2px;
+    stroke-linecap: round;
+}
+
+/* Connection label: solid rounded background so the line doesn't show through. */
+.crawl-mapper-point-edge-label-bg {
+    fill: var(--background-primary, #fff);
+    stroke: var(--background-modifier-border, #bbb);
+    stroke-width: 1px;
+}
+
+.crawl-mapper-point-edge-label {
+    fill: var(--text-normal, #222);
+}
+
+/* Linked connection labels read as clickable: accent border + accent text. */
+.crawl-mapper-point-edge-label-link {
+    cursor: pointer;
+}
+
+.crawl-mapper-point-edge-label-bg--link {
+    stroke: var(--interactive-accent, #6c8cff);
+}
+
+.crawl-mapper-point-edge-label--link {
+    fill: var(--text-accent, #4a6cf7);
+}
+
+/* Group region: a labelled, dashed box around a cluster of locations ("one area"). */
+.crawl-mapper-point-group-box {
+    fill: var(--background-secondary, #f2f2f2);
+    fill-opacity: 0.35;
+    stroke: var(--background-modifier-border, #bbb);
+    stroke-width: 1.5px;
+    stroke-dasharray: 6 4;
+}
+
+.crawl-mapper-point-group-label {
+    fill: var(--text-muted, #888);
+    font-weight: 700;
+}
+
+/* Only the group label is clickable — the box is not. */
+.crawl-mapper-point-group-link {
+    cursor: pointer;
+}
+
+.crawl-mapper-point-group-label--link {
+    fill: var(--text-accent, #4a6cf7);
+}
+
+/* Location pills. */
+.crawl-mapper-point-node-box {
+    fill: var(--background-secondary, #f2f2f2);
+    stroke: var(--background-modifier-border, #bbb);
+    stroke-width: 1.5px;
+}
+
+.crawl-mapper-point-node-label {
+    fill: var(--text-normal, #222);
+    font-weight: 600;
+}
+
+/* Linked locations read as clickable: accent border + accent text. */
+.crawl-mapper-point-node-link {
+    cursor: pointer;
+}
+
+.crawl-mapper-point-node--link .crawl-mapper-point-node-box {
+    stroke: var(--interactive-accent, #6c8cff);
+}
+
+.crawl-mapper-point-node--link .crawl-mapper-point-node-label {
+    fill: var(--text-accent, #4a6cf7);
+}
+
+.crawl-mapper-point-node-link:hover .crawl-mapper-point-node-box {
+    fill: var(--background-modifier-hover, #e6e6e6);
+}

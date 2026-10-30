@@ -1,0 +1,10 @@
+{
+	"id": "crawl-mapper",
+	"name": "Crawl Mapper",
+	"version": "0.1.0",
+	"minAppVersion": "1.5.0",
+	"description": "Draw hexcrawl, dungeon, pointcrawl, and citycrawl maps from plain text in code blocks.",
+	"author": "Alicia Wilkerson",
+	"authorUrl": "https://github.com/matalina",
+	"isDesktopOnly": false
+}
