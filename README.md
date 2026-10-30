@@ -17,6 +17,36 @@ Draw crawl maps from plain text inside Obsidian code blocks:
 
 `text-mapper` code blocks render too, so maps written for Text Mapper or Tag and Tally keep working.
 
+## Icon packs
+
+Hex map icons come in packs, one folder each under [`icons/`](icons):
+
+| Pack | What's in it |
+| --- | --- |
+| `terrain` | forest, plains, mountain, swamp, desert, hills, islands… plus `<terrain>-bg` colours |
+| `markers` | pin, star, flag, signpost, heart, danger, bed, anchor |
+| `fantasy` | castle, dungeon, lair, dragon, camp, settlement, npc… |
+| `fantasy-city` | noble, market, slums, religious, arcane… districts plus `<district>-bg` colours |
+| `modern-city` | downtown, financial, tech, university… plus `high-class`, `park` and other aliases |
+
+Pick packs per map with an `option icons` line, or `all`:
+
+````markdown
+```crawl-mapper
+option icons terrain markers
+0101 forest-bg forest
+0102 plains-bg plains pin "Camp"
+```
+````
+
+Maps without the line use **Settings → Crawl Mapper → Default icon packs** (default `all`). If a map uses an icon that no loaded pack has, a note under the map names it and the pack it lives in.
+
+### Adding a pack
+
+Add a folder under `icons/` with one SVG per icon, named by its id (`icons/my-system/vending-machine.svg`). Each SVG must be a 512×512 canvas (`viewBox="0 0 512 512"`) holding a single `<path>`, with no fill, stroke, text or ids. An optional `pack.txt` adds theme lines such as `vending-machine-bg attributes fill="#ccc"`, and `alias <new id> <existing id>` lines that reuse an icon from any pack. The build picks the folder up automatically.
+
+## Using maps
+
 Pan by dragging, zoom with the scroll wheel, double-click to re-center. Right-click a map to re-center it, save it as a PNG, or show and hide its overlays.
 
 ## Lineage

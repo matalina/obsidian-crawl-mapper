@@ -104,3 +104,10 @@
 .crawl-mapper-point-node-link:hover .crawl-mapper-point-node-box {
     fill: var(--background-modifier-hover, #e6e6e6);
 }
+
+/* Unknown icon packs or icons a map uses but no loaded pack defines. */
+.crawl-mapper-note {
+    margin-top: 4px;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+}

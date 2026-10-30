@@ -1,0 +1,19 @@
+# District backgrounds
+high-class-bg attributes fill="#F3E6C8"
+financial-bg attributes fill="#FFF0D6"
+middle-class-bg attributes fill="#E6EAE4"
+park-bg attributes fill="#E1F2E1"
+medical-park-bg attributes fill="#E6F4F2"
+commercial-bg attributes fill="#EAF2D8"
+downtown-bg attributes fill="#F6E3EA"
+government-bg attributes fill="#E8ECF6"
+university-bg attributes fill="#F0E9F8"
+tech-bg attributes fill="#E6F0FF"
+warehouse-bg attributes fill="#EFE6DA"
+
+# Aliases reuse an icon from any pack: alias <new id> <existing icon>
+alias high-class noble
+alias middle-class residential
+alias park garden
+alias commercial market
+alias government admin

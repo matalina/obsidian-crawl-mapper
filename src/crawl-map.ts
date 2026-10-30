@@ -2,35 +2,10 @@ import { MarkdownRenderChild, Menu, Notice } from 'obsidian';
 import type CrawlMapperPlugin from './main';
 import { TextMapperParser } from './text-mapper/parser';
 import { Point } from './text-mapper/orientation';
-import { CRAWL_MAPPER_THEME } from './text-mapper/themes/crawl-mapper';
+import { buildThemeLines, findMissingIcons, getIconPacksFromSource, parseIconPackList } from './icon-packs';
 import { textMapperSourceIsDungeon } from './text-mapper/dungeon-detect';
 import { textMapperSourceIsCity } from './text-mapper/city-detect';
 import { OPTION_REGEX, SVGElement as CustomSVGElement } from './text-mapper/constants';
-
-/**
- * Extract theme option from source code if present
- * @param source The map source code
- * @returns Theme name if found, null otherwise
- */
-function getThemeFromSource(source: string): string | null {
-  const lines = source.split('\n');
-  for (const line of lines) {
-    if (line.startsWith('#')) {
-      continue;
-    }
-    if (OPTION_REGEX.test(line)) {
-      const match = line.match(OPTION_REGEX);
-      if (match) {
-        const optionStr = match[1].trim();
-        const tokens = optionStr.split(' ');
-        if (tokens.length >= 2 && tokens[0] === 'theme') {
-          return tokens[1].toLowerCase();
-        }
-      }
-    }
-  }
-  return null;
-}
 
 /**
  * Extract zoom option from source code if present
@@ -58,16 +33,6 @@ function getZoomFromSource(source: string): number | null {
     }
   }
   return null;
-}
-
-/**
- * Get the theme constant string based on theme name
- * @param themeName The theme name (only "crawl-mapper" is supported)
- * @returns The theme constant string
- */
-function getThemeConstant(themeName: string): string {
-  // Only the crawl-mapper theme is supported
-  return CRAWL_MAPPER_THEME;
 }
 
 export class CrawlMap extends MarkdownRenderChild {
@@ -128,10 +93,8 @@ export class CrawlMap extends MarkdownRenderChild {
   }
 
   refresh() {
-    // Only refresh if this mapper doesn't have a theme override in source
-    // (mappers with theme override shouldn't change when default changes)
-    const themeFromSource = getThemeFromSource(this.source);
-    if (!themeFromSource) {
+    // Only maps without their own `option icons` follow the default packs setting
+    if (getIconPacksFromSource(this.source) === null) {
       // Reset pan and zoom state
       this.panX = 0;
       this.panY = 0;
@@ -144,18 +107,14 @@ export class CrawlMap extends MarkdownRenderChild {
   }
 
   private render() {
-    // Determine which theme to use
-    const themeFromSource = getThemeFromSource(this.source);
-    // Only the crawl-mapper theme is supported
-    const themeName = themeFromSource || 'crawl-mapper';
-    const themeConstant = getThemeConstant(themeName);
+    // Icon packs: the map's own `option icons …`, else the plugin default
+    const selection = parseIconPackList(getIconPacksFromSource(this.source) ?? this.plugin.settings.defaultIconPacks);
 
-    const useDungeonOnly = textMapperSourceIsDungeon(this.source);
-    const useCityOnly = textMapperSourceIsCity(this.source);
-    const totalSource =
-      useDungeonOnly || useCityOnly
-        ? this.source.split('\n')
-        : themeConstant.split('\n').concat(this.source.split('\n'));
+    // Dungeon and city maps draw their own tiles and use no theme
+    const useTheme = !textMapperSourceIsDungeon(this.source) && !textMapperSourceIsCity(this.source);
+    const totalSource = useTheme
+      ? buildThemeLines(selection.packs).concat(this.source.split('\n'))
+      : this.source.split('\n');
 
     this.parser = new TextMapperParser(this.docId);
     this.parser.process(totalSource);
@@ -185,6 +144,25 @@ export class CrawlMap extends MarkdownRenderChild {
 
       // Apply overlay visibility state from settings
       this.applyOverlayVisibility();
+    }
+
+    if (useTheme) this.renderIconNote(selection.unknown);
+  }
+
+  /** Say which icon names didn't resolve, instead of silently drawing nothing. */
+  private renderIconNote(unknownPacks: string[]) {
+    if (!this.parser) return;
+    const problems: string[] = [];
+    if (unknownPacks.length > 0) {
+      problems.push(`Unknown icon packs: ${unknownPacks.join(', ')}.`);
+    }
+    const missing = findMissingIcons(this.parser);
+    if (missing.length > 0) {
+      const names = missing.map(({ name, pack }) => (pack ? `${name} (in ${pack})` : name));
+      problems.push(`Not in the loaded icon packs: ${names.join(', ')}.`);
+    }
+    if (problems.length > 0) {
+      this.mapEl.createDiv({ cls: 'crawl-mapper-note', text: problems.join(' ') });
     }
   }
 

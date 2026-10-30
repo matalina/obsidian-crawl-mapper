@@ -1,0 +1,12 @@
+# Terrain backgrounds: use as "<terrain>-bg" on a hex, e.g. 0101 forest-bg forest
+forest-bg attributes fill="#6FAF84"
+plains-bg attributes fill="#D6E6B8"
+mountain-bg attributes fill="#B3B6B8"
+swamp-bg attributes fill="#8FA582"
+island-bg attributes fill="#7FC3D2"
+desert-bg attributes fill="#F1DCA8"
+wastelands-bg attributes fill="#C9A183"
+magiclands-bg attributes fill="#B6A1EE"
+
+# Older maps (and the Tag and Tally docs) use the singular
+alias wasteland wastelands
