@@ -1,5 +1,6 @@
 import { ICON_PACKS } from 'virtual:icon-packs';
 import { BASE_THEME } from './text-mapper/themes/base';
+import { TAILWIND_COLOR_THEME } from './text-mapper/themes/tailwind-colors';
 import { OPTION_REGEX } from './text-mapper/constants';
 import type { TextMapperParser } from './text-mapper/parser';
 
@@ -41,9 +42,9 @@ export function getIconPacksFromSource(source: string): string | null {
   return null;
 }
 
-/** Base theme plus the chosen packs, as source lines for the parser. */
+/** Base theme, Tailwind colours and the chosen packs, as source lines for the parser. */
 export function buildThemeLines(packs: string[]): string[] {
-  return [BASE_THEME, ...packs.map((id) => ICON_PACKS[id].theme)].join('\n').split('\n');
+  return [BASE_THEME, TAILWIND_COLOR_THEME, ...packs.map((id) => ICON_PACKS[id].theme)].join('\n').split('\n');
 }
 
 const OVERLAY_TYPE = /^(?:overlay|faction)-\d+-\d+$/;

@@ -41,6 +41,17 @@ option icons terrain markers
 
 Maps without the line use **Settings → Crawl Mapper → Default icon packs** (default `all`). If a map uses an icon that no loaded pack has, a note under the map names it and the pack it lives in.
 
+### Colours
+
+Any hex can take a [Tailwind CSS colour](https://tailwindcss.com/docs/colors) as its background, whatever packs are loaded: `red-50` through `red-950`, and the same eleven shades for orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose, slate, gray, zinc, neutral, stone, mauve, olive, mist and taupe, plus `black` and `white`.
+
+````markdown
+```crawl-mapper
+0101 red-500 dragon "Burning Crag"
+0102 sky-200 "Frozen Lake"
+```
+````
+
 ### Adding a pack
 
 Add a folder under `icons/` with one SVG per icon, named by its id (`icons/my-system/vending-machine.svg`). Each SVG must be a 512×512 canvas (`viewBox="0 0 512 512"`) holding a single `<path>`, with no fill, stroke, text or ids. An optional `pack.txt` adds theme lines such as `vending-machine-bg attributes fill="#ccc"`, and `alias <new id> <existing id>` lines that reuse an icon from any pack. The build picks the folder up automatically.
