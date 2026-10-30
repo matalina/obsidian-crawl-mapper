@@ -42,9 +42,31 @@ export function getIconPacksFromSource(source: string): string | null {
   return null;
 }
 
-/** Base theme, Tailwind colours and the chosen packs, as source lines for the parser. */
-export function buildThemeLines(packs: string[]): string[] {
-  return [BASE_THEME, TAILWIND_COLOR_THEME, ...packs.map((id) => ICON_PACKS[id].theme)].join('\n').split('\n');
+const BASE_LINES = [BASE_THEME, TAILWIND_COLOR_THEME].join('\n').split('\n');
+const packLines = new Map<string, string[]>();
+// One built icon per line: <g id="x"><path …/></g>
+const ICON_DEF = /^<g id="([^"]+)">.*<\/g>$/;
+
+/**
+ * Base theme, Tailwind colours and the chosen packs, as source lines for the
+ * parser. Icon defs the map never mentions are left out, so each SVG carries
+ * only the drawings it uses.
+ */
+export function buildThemeLines(packs: string[], source: string): string[] {
+  const mentioned = new Set(source.split(/[\s"'#<>=(),]+/));
+  const lines = [...BASE_LINES];
+  for (const id of packs) {
+    let theme = packLines.get(id);
+    if (!theme) {
+      theme = ICON_PACKS[id].theme.split('\n');
+      packLines.set(id, theme);
+    }
+    for (const line of theme) {
+      const def = line.match(ICON_DEF);
+      if (!def || mentioned.has(def[1])) lines.push(line);
+    }
+  }
+  return lines;
 }
 
 const OVERLAY_TYPE = /^(?:overlay|faction)-\d+-\d+$/;
@@ -54,6 +76,7 @@ const OVERLAY_TYPE = /^(?:overlay|faction)-\d+-\d+$/;
  * would supply it (null when no pack has it).
  */
 export function findMissingIcons(parser: TextMapperParser): { name: string; pack: string | null }[] {
+  // Types drawn by "<type> attributes …" or "<type> path …" lines need no icon.
   const attributes = new Set(Object.keys(parser.attributes));
   // Def ids are namespaced per map, so compare against region.namespace(type).
   const defIds = new Set<string>();
@@ -64,7 +87,14 @@ export function findMissingIcons(parser: TextMapperParser): { name: string; pack
   const missing = new Set<string>();
   for (const region of parser.regions) {
     for (const type of region.types) {
-      if (attributes.has(type) || defIds.has(region.namespace(type)) || OVERLAY_TYPE.test(type)) continue;
+      if (
+        attributes.has(type) ||
+        type in parser.path ||
+        defIds.has(region.namespace(type)) ||
+        OVERLAY_TYPE.test(type)
+      ) {
+        continue;
+      }
       missing.add(type);
     }
   }

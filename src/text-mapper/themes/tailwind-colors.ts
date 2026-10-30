@@ -32,11 +32,38 @@ const PALETTE: Record<string, string[]> = {
   taupe: ['98.6% 0.002 67.8', '96% 0.002 17.2', '92.2% 0.005 34.3', '86.8% 0.007 39.5', '71.4% 0.014 41.2', '54.7% 0.021 43.1', '43.8% 0.017 39.3', '36.7% 0.016 35.7', '26.8% 0.011 36.5', '21.4% 0.009 43.1', '14.7% 0.004 49.3'],
 };
 
-/** Colour name → CSS colour, e.g. "red-500" → "oklch(63.7% 0.237 25.331)". */
+/**
+ * "63.7% 0.237 25.331" → "#fb2c36". oklch() needs iOS 15.4+, so fills use sRGB
+ * hex; colours outside sRGB are clipped per channel.
+ */
+export function oklchToHex(value: string): string {
+  const [l, c, h] = value.split(' ').map(parseFloat);
+  const L = l / 100;
+  const a = c * Math.cos((h * Math.PI) / 180);
+  const b = c * Math.sin((h * Math.PI) / 180);
+  const l_ = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m_ = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s_ = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const linear = [
+    4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+    -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+    -0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_,
+  ];
+  return `#${linear
+    .map((x) => {
+      const v = x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055;
+      return Math.round(Math.min(1, Math.max(0, v)) * 255)
+        .toString(16)
+        .padStart(2, '0');
+    })
+    .join('')}`;
+}
+
+/** Colour name → CSS colour, e.g. "red-500" → "#fb2c36". */
 export const TAILWIND_COLORS: Record<string, string> = {
   ...Object.fromEntries(
     Object.entries(PALETTE).flatMap(([name, shades]) =>
-      shades.map((value, i) => [`${name}-${SHADES[i]}`, `oklch(${value})`]),
+      shades.map((value, i) => [`${name}-${SHADES[i]}`, oklchToHex(value)]),
     ),
   ),
   black: '#000',

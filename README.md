@@ -85,7 +85,7 @@ The map icons in [`icons/`](icons) (and embedded in the default theme) are © 20
 npm install
 npm run dev     # watch build
 npm run build   # production build
-npm test        # city and pointcrawl notation tests
+npm test        # notation, colour and icon pack tests
 ```
 
 Copy `main.js`, `manifest.json` and `styles.css` into `<Vault>/.obsidian/plugins/crawl-mapper/` to try it.

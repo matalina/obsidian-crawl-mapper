@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, type SettingDefinitionItem } from 'obsidian';
+import { App, debounce, PluginSettingTab, type SettingDefinitionItem } from 'obsidian';
 import type CrawlMapperPlugin from './main';
 import { ICON_PACK_IDS } from './icon-packs';
 
@@ -56,7 +56,11 @@ export class CrawlMapperSettingTab extends PluginSettingTab {
       this.plugin.activeMappers.forEach((mapper) => mapper.applyOverlayVisibility());
     }
     if (key === 'defaultIconPacks') {
-      this.plugin.activeMappers.forEach((mapper) => mapper.refresh());
+      this.refreshMappers();
     }
   }
+
+  // Wait for typing to pause, so maps don't re-render (and flash notes about
+  // half-typed pack names) on every keystroke.
+  private refreshMappers = debounce(() => this.plugin.activeMappers.forEach((mapper) => mapper.refresh()), 600, true);
 }

@@ -34,53 +34,61 @@ export function buildIconPacks(iconsDir) {
 		.filter((name) => statSync(path.join(iconsDir, name)).isDirectory())
 		.sort();
 
-	// First pass: every icon's path data, so aliases can reach across packs.
-	const pathData = new Map();
+	// Every icon id across all packs (SVGs, aliases and raw <g id> defs in
+	// pack.txt) must be unique, or loading both packs gives two defs with one id.
 	const owner = new Map();
+	const claim = (id, pack, where) => {
+		if (owner.has(id)) {
+			throw new Error(`${where}: icon "${id}" is already defined in "${owner.get(id)}"`);
+		}
+		owner.set(id, pack);
+	};
+
+	// First pass: every SVG's path data, so aliases can reach across packs.
+	const pathData = new Map();
 	const files = [];
 	for (const pack of packIds) {
 		for (const file of readdirSync(path.join(iconsDir, pack)).filter((f) => f.endsWith(".svg")).sort()) {
-			const id = file.slice(0, -4);
-			if (owner.has(id)) {
-				throw new Error(`Icon "${id}" is in both "${owner.get(id)}" and "${pack}"`);
-			}
 			const full = path.join(iconsDir, pack, file);
-			pathData.set(id, readIcon(full));
-			owner.set(id, pack);
+			claim(file.slice(0, -4), pack, full);
+			pathData.set(file.slice(0, -4), readIcon(full));
 			files.push(full);
 		}
 	}
 
 	const packs = {};
 	for (const pack of packIds) {
-		const dir = path.join(iconsDir, pack);
 		const icons = [...owner].filter(([, p]) => p === pack).map(([id]) => id);
 		const lines = [`# Icon pack: ${pack}`];
 
-		const packFile = path.join(dir, "pack.txt");
+		const packFile = path.join(iconsDir, pack, "pack.txt");
 		if (existsSync(packFile)) {
 			files.push(packFile);
 			for (const line of readFileSync(packFile, "utf8").split(/\r?\n/)) {
 				const alias = line.match(/^alias\s+(\S+)\s+(\S+)\s*$/);
-				if (!alias) {
-					lines.push(line);
+				if (alias) {
+					const [, id, target] = alias;
+					if (!pathData.has(target)) {
+						throw new Error(`${packFile}: alias "${id}" points at unknown icon "${target}"`);
+					}
+					claim(id, pack, packFile);
+					// Copy the target's drawing so the pack works without the target's pack loaded.
+					lines.push(iconDef(id, pathData.get(target)));
+					icons.push(id);
 					continue;
 				}
-				const [, id, target] = alias;
-				if (!pathData.has(target)) {
-					throw new Error(`${packFile}: alias "${id}" points at unknown icon "${target}"`);
+				// A hand-written def (<g id="x">…) is an icon of this pack too.
+				const def = line.match(/^\s*<\w+\s+id="([^"]+)"/);
+				if (def) {
+					claim(def[1], pack, packFile);
+					icons.push(def[1]);
 				}
-				if (owner.has(id) || icons.includes(id)) {
-					throw new Error(`${packFile}: alias "${id}" clashes with an existing icon`);
-				}
-				// Copy the target's drawing so the pack works without the target's pack loaded.
-				lines.push(iconDef(id, pathData.get(target)));
-				icons.push(id);
+				lines.push(line);
 			}
 		}
 
-		for (const id of icons) {
-			if (owner.get(id) === pack) lines.push(iconDef(id, pathData.get(id)));
+		for (const [id, p] of owner) {
+			if (p === pack && pathData.has(id)) lines.push(iconDef(id, pathData.get(id)));
 		}
 		packs[pack] = { theme: lines.join("\n"), icons: icons.sort() };
 	}

@@ -93,27 +93,31 @@ export class CrawlMap extends MarkdownRenderChild {
   }
 
   refresh() {
-    // Only maps without their own `option icons` follow the default packs setting
-    if (getIconPacksFromSource(this.source) === null) {
-      // Reset pan and zoom state
-      this.panX = 0;
-      this.panY = 0;
-      this.zoom = 1.0;
-      this.isDragging = false;
+    // Only hex maps without their own `option icons` follow the default packs setting
+    if (!this.usesTheme() || getIconPacksFromSource(this.source) !== null) return;
 
-      this.mapEl.empty();
-      this.render();
-    }
+    // Reset pan and zoom state
+    this.panX = 0;
+    this.panY = 0;
+    this.zoom = 1.0;
+    this.isDragging = false;
+
+    this.mapEl.empty();
+    this.render();
+  }
+
+  /** Dungeon and city maps draw their own tiles and use no theme or icon packs. */
+  private usesTheme(): boolean {
+    return !textMapperSourceIsDungeon(this.source) && !textMapperSourceIsCity(this.source);
   }
 
   private render() {
     // Icon packs: the map's own `option icons …`, else the plugin default
     const selection = parseIconPackList(getIconPacksFromSource(this.source) ?? this.plugin.settings.defaultIconPacks);
 
-    // Dungeon and city maps draw their own tiles and use no theme
-    const useTheme = !textMapperSourceIsDungeon(this.source) && !textMapperSourceIsCity(this.source);
+    const useTheme = this.usesTheme();
     const totalSource = useTheme
-      ? buildThemeLines(selection.packs).concat(this.source.split('\n'))
+      ? buildThemeLines(selection.packs, this.source).concat(this.source.split('\n'))
       : this.source.split('\n');
 
     this.parser = new TextMapperParser(this.docId);
