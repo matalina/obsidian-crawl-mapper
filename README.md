@@ -27,7 +27,8 @@ Hex map icons come in packs, one folder each under [`icons/`](icons):
 | `markers` | pin, star, flag, signpost, heart, danger, bed, anchor |
 | `fantasy` | castle, dungeon, lair, dragon, camp, settlement, npc… |
 | `fantasy-city` | noble, market, slums, religious, arcane… districts plus `<district>-bg` colours |
-| `modern-city` | downtown, financial, tech, university… plus `high-class`, `park` and other aliases |
+| `modern-city` | downtown, financial, tech, university, park… plus `high-class` and other aliases |
+| `carl-rpg` | Dungeon Crawler Carl locations: safe-room, boss, floor-exit, dungeon-entrance, tavern, shop, quest, treasure, subway… |
 
 Pick packs per map with an `option icons` line, or `all`:
 

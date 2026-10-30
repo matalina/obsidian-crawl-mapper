@@ -6,10 +6,17 @@ import { buildIconPacks } from './icon-packs.mjs';
 
 const { packs } = buildIconPacks('icons');
 
-assert.deepEqual(Object.keys(packs), ['fantasy', 'fantasy-city', 'markers', 'modern-city', 'terrain']);
+assert.deepEqual(Object.keys(packs), ['carl-rpg', 'fantasy', 'fantasy-city', 'markers', 'modern-city', 'terrain']);
 
 const counts = Object.fromEntries(Object.entries(packs).map(([id, p]) => [id, p.icons.length]));
-assert.deepEqual(counts, { fantasy: 18, 'fantasy-city': 14, markers: 8, 'modern-city': 17, terrain: 14 });
+assert.deepEqual(counts, {
+  'carl-rpg': 38,
+  fantasy: 18,
+  'fantasy-city': 14,
+  markers: 8,
+  'modern-city': 17,
+  terrain: 14,
+});
 
 // Every icon is defined exactly once in its pack's theme text.
 for (const [id, pack] of Object.entries(packs)) {

@@ -14,6 +14,5 @@ warehouse-bg attributes fill="#EFE6DA"
 # Aliases reuse an icon from any pack: alias <new id> <existing icon>
 alias high-class noble
 alias middle-class residential
-alias park garden
 alias commercial market
 alias government admin
