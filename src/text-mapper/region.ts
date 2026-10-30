@@ -3,12 +3,13 @@ import { Point, Orientation } from "./orientation";
 import { NamespaceFunction } from "./constants";
 
 export class Region {
-    x: number;
-    y: number;
+    // x, y and id are set by TextMapperParser.makeRegion
+    x!: number;
+    y!: number;
     types: string[];
-    label: string;
-    size: string;
-    id: string;
+    label?: string;
+    size?: string;
+    id!: string;
     namespace: NamespaceFunction;
 
     constructor(namespace: NamespaceFunction) {

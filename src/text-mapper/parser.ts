@@ -181,7 +181,7 @@ interface ParsedOption {
 
 export class TextMapperParser {
   id: string;
-  pathId: number;
+  pathId = 0;
   options: MapOptions;
   regions: Region[]; // ' => sub { [] };
   attributes: Record<string, SvgAttributes>; // ' => sub { {} };
@@ -192,7 +192,8 @@ export class TextMapperParser {
   textAttributes: SvgAttributes;
   glowAttributes: SvgAttributes;
   labelAttributes: SvgAttributes;
-  orientation: Orientation;
+  /** Set at the start of process(), before anything reads it. */
+  orientation!: Orientation;
   dungeonRooms: Room[];
   cityStreets: CityStreet[];
   cityJunctions: CityJunctionDef[];

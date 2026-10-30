@@ -2,13 +2,16 @@ import { SVGElement, SvgAttributes } from "./constants";
 import { Point, Orientation } from "./orientation";
 
 export class Spline {
-    types: string;
-    label: string;
-    side: string;
-    start: string;
-    id: string;
+    // types (required in SPLINE_REGEX) and id are set by TextMapperParser;
+    // label, side and start are optional regex groups
+    types!: string;
+    label?: string;
+    side?: string;
+    start?: string;
+    id!: string;
     points: Point[];
-    orientation: Orientation;
+    /** Set at the start of svg(), before anything reads it. */
+    orientation!: Orientation;
 
     constructor() {
         this.points = [];

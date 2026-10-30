@@ -4,7 +4,7 @@
 		"inlineSources": true,
 		"module": "ESNext",
 		"target": "ES2021",
-		"strict": false,
+		"strict": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedIndexedAccess": false,
@@ -16,9 +16,7 @@
 		"lib": [
 			"ES2021",
 			"DOM"
-		],
-		"noImplicitAny": true,
-		"strictNullChecks": true
+		]
 	},
 	"include": [
 		"src/**/*.ts"

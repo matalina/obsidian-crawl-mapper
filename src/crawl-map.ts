@@ -193,7 +193,7 @@ export class CrawlMap extends MarkdownRenderChild {
 
     // Find the overlays group using the namespace
     const overlaysId = this.parser.options.global ? 'overlays' : `overlays-${this.parser.id}`;
-    const overlaysEl = this.svgDomElement.querySelector(`#${overlaysId}`) as SVGGElement;
+    const overlaysEl = this.svgDomElement.querySelector<SVGGElement>(`#${overlaysId}`);
 
     if (overlaysEl) {
       overlaysEl.style.display = this.plugin.settings.overlaysVisible ? '' : 'none';
