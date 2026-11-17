@@ -1,7 +1,7 @@
 {
 	"id": "crawl-mapper",
 	"name": "Crawl Mapper",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "1.13.0",
 	"description": "Draw hexcrawl, dungeon, pointcrawl, and citycrawl maps from plain text in code blocks.",
 	"author": "Alicia Wilkerson",
