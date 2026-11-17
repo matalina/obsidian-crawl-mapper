@@ -40,6 +40,7 @@ import {
 import type { PointGraph, PointLayout } from '../pointcrawl/types';
 import { parsePointCrawl } from '../pointcrawl/notation';
 import { computePointCrawlLayout } from '../pointcrawl/layout';
+import { linkContainer, parseLinkedLabel } from '../label-link';
 
 const DUNGEON_TILE_PX = 22;
 const DUNGEON_MARGIN_TILES = 2;
@@ -1510,7 +1511,9 @@ export class TextMapperParser {
       const nameCy = seg.startGY + 0.5 + (dy * (Ln - 1)) / 2;
       const mx = nameCx * TILE;
       const my = nameCy * TILE;
-      const nameEl = gEl.createSvg('text', {
+      const street = seg.street;
+      const nameParent = linkContainer(gEl, street.linkTarget, 'crawl-mapper-label-link');
+      const nameEl = nameParent.createSvg('text', {
         attr: {
           x: mx.toFixed(1),
           y: my.toFixed(1),
@@ -1518,9 +1521,10 @@ export class TextMapperParser {
           'dominant-baseline': 'middle',
           'font-size': '9',
           fill: '#111',
+          ...(street.linkTarget ? { class: 'crawl-mapper-label--link' } : {}),
         },
       });
-      nameEl.textContent = seg.street.name;
+      nameEl.textContent = street.display ?? street.name;
     }
 
     const junctionByKey = new Map<string, (typeof layout.junctions)[0]>();
@@ -1590,12 +1594,17 @@ export class TextMapperParser {
     for (const j of layout.junctions) {
       junctionLabelByKey.set(`${j.gx},${j.gy}`, j);
     }
+    // Layout labels junctions by id; the `@Id "Note|Text"` def supplies display + link.
+    const junctionDefById = new Map(this.cityJunctions.map((d) => [d.id, d]));
     for (const j of junctionLabelByKey.values()) {
       if (!j.label) continue;
-      const jtx = j.label.length > 14 ? `${j.label.slice(0, 12)}…` : j.label;
+      const def = junctionDefById.get(j.label);
+      const jText = def?.display ?? j.label;
+      const jtx = jText.length > 14 ? `${jText.slice(0, 12)}…` : jText;
       const jcx = (j.gx + 0.5) * TILE;
       const jcy = (j.gy + 0.5) * TILE;
-      const jLabelEl = gEl.createSvg('text', {
+      const jParent = linkContainer(gEl, def?.linkTarget, 'crawl-mapper-label-link');
+      const jLabelEl = jParent.createSvg('text', {
         attr: {
           x: jcx.toFixed(1),
           y: jcy.toFixed(1),
@@ -1606,6 +1615,7 @@ export class TextMapperParser {
           stroke: '#f2f7fa',
           'stroke-width': '0.45',
           'paint-order': 'stroke fill',
+          ...(def?.linkTarget ? { class: 'crawl-mapper-label--link' } : {}),
         },
       });
       jLabelEl.textContent = jtx;
@@ -1613,7 +1623,10 @@ export class TextMapperParser {
 
     const facadeFs = 7;
     for (const f of layout.facadeLabels) {
-      const tx = f.text.length > 14 ? `${f.text.slice(0, 12)}…` : f.text;
+      // A building may be `"Note|Text"`; the whole tag (box + text) is the link.
+      const { linkTarget: fLink, display: fText } = parseLinkedLabel(f.text);
+      const tx = fText.length > 14 ? `${fText.slice(0, 12)}…` : fText;
+      const fParent = linkContainer(gEl, fLink, 'crawl-mapper-label-link');
       /* f.gx/f.gy are already tile-space positions (cell center ± offset) */
       const lx = f.gx * TILE;
       const ly = f.gy * TILE;
@@ -1622,7 +1635,7 @@ export class TextMapperParser {
       const boxW = Math.max(facadeFs * 1.65, 0.52 * facadeFs * tx.length + padX * 2);
       const boxH = facadeFs * 1.22 + padY * 2;
       const strokeC = f.side === 'L' ? '#1a4d8c' : '#6b2d5c';
-      gEl.createSvg('rect', {
+      fParent.createSvg('rect', {
         attr: {
           x: (lx - boxW / 2).toFixed(1),
           y: (ly - boxH / 2).toFixed(1),
@@ -1636,7 +1649,7 @@ export class TextMapperParser {
           'fill-opacity': '0.94',
         },
       });
-      const fe = gEl.createSvg('text', {
+      const fe = fParent.createSvg('text', {
         attr: {
           x: lx.toFixed(1),
           y: ly.toFixed(1),
@@ -1644,6 +1657,7 @@ export class TextMapperParser {
           'dominant-baseline': 'middle',
           'font-size': String(facadeFs),
           fill: strokeC,
+          ...(fLink ? { class: 'crawl-mapper-label--link' } : {}),
         },
       });
       fe.textContent = tx;
@@ -1886,7 +1900,8 @@ export class TextMapperParser {
         cx = (x + room.width / 2) * TILE;
         cy = (y + room.height / 2) * TILE;
       }
-      const textEl = gEl.createSvg('text', {
+      const labelParent = linkContainer(gEl, room.linkTarget, 'crawl-mapper-label-link');
+      const textEl = labelParent.createSvg('text', {
         attr: {
           x: cx.toFixed(1),
           y: cy.toFixed(1),
@@ -1894,9 +1909,10 @@ export class TextMapperParser {
           'dominant-baseline': 'middle',
           'font-size': '11',
           fill: '#333',
+          ...(room.linkTarget ? { class: 'crawl-mapper-label--link' } : {}),
         },
       });
-      textEl.textContent = room.name;
+      textEl.textContent = room.display ?? room.name;
     }
 
     for (const d of layout.doors) {

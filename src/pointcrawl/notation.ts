@@ -20,6 +20,7 @@
  */
 
 import type { PointGraph, PointNode, PointEdge, PointGroup } from './types';
+import { splitLinkAndDisplay } from '../label-link';
 
 /** `NodeID: "..."` (the quoted value may contain a `Target|Display` pipe). */
 const ALIAS_REGEX = /^([A-Za-z0-9_]+)\s*:\s*"([^"]*)"$/;
@@ -36,23 +37,7 @@ const GROUP_REGEX = /^\[([^\]]*)\]$/;
  */
 const CONNECTION_REGEX = /^([A-Za-z0-9_]+)\s*-(?:\[([^\]]*)\])?->?\s*([A-Za-z0-9_]+)$/;
 
-/**
- * Split an alias display value on its first `|` into an optional link target
- * and the display text — same `Target|Display` convention as hex-region labels
- * (Region.computeLinkAndLabel).
- */
-export function splitLinkAndDisplay(raw: string): {
-    linkTarget: string | null;
-    display: string;
-} {
-    const pipe = raw.indexOf('|');
-    if (pipe === -1) {
-        return { linkTarget: null, display: raw.trim() };
-    }
-    const link = raw.slice(0, pipe).trim();
-    const display = raw.slice(pipe + 1).trim();
-    return { linkTarget: link.length > 0 ? link : null, display };
-}
+export { splitLinkAndDisplay } from '../label-link';
 
 /** Parse the point-crawl body lines into a graph of nodes and edges. */
 export function parsePointCrawl(lines: string[]): PointGraph {

@@ -1,6 +1,7 @@
 /**
  * Dungeon map notation — serialize/parse to markdown-friendly text.
- * Format: Name:WxH dir->Target …
+ * Format: Name:WxH ["Note|Text"] dir->Target …
+ * - "Note|Text" (optional) links the room label to a note; "Text" alone renames it on the map
  * - n-> / n=> — bare regular vs reinforced
  * - n-[tag]-> / n=[tag]=> — tagged (do not mix -[tag]=> or =[tag]->)
  * - Bracket body: [open 3:6] source+receive, [open :6] receive-only (tagged), [:6] receive-only (no tag),
@@ -9,6 +10,7 @@
 
 import type { Room, ExitInfo, ExitDirection, DoorType } from "./types";
 import { createEmptyExits } from "./types";
+import { extractQuoted, parseLinkedLabel } from "../label-link";
 
 const DIRS: ExitDirection[] = ["N", "S", "E", "W"];
 const DIR_LOWER = { N: "n", S: "s", E: "e", W: "w" } as const;
@@ -110,6 +112,14 @@ function formatBracketInner(ex: ExitInfo): string {
     return "";
 }
 
+/** `"Note|Text"` / `"Text"` for a room with a link or a display name; "" otherwise. */
+function serializeRoomLabel(room: Room): string {
+    const display = room.display ?? room.name;
+    if (room.linkTarget) return `"${room.linkTarget}|${display}"`;
+    if (room.display != null && room.display !== room.name) return `"${room.display}"`;
+    return "";
+}
+
 /** Serialize a single room to one line of notation. Use nameById to output room names instead of ids. */
 export function serializeRoom(room: Room, nameById?: Map<string, string>): string {
     const dims = `${room.width}x${room.height}`;
@@ -136,7 +146,8 @@ export function serializeRoom(room: Room, nameById?: Map<string, string>): strin
             parts.push(`${dir}${ex.reinforced ? "=>" : "->"}${target}`);
         }
     }
-    return `${room.name}:${dims} ${parts.join(" ")}`.trim();
+    const label = serializeRoomLabel(room);
+    return [`${room.name}:${dims}`, label, ...parts].filter(Boolean).join(" ");
 }
 
 /** Serialize full dungeon text (rooms only). Uses room names for targets, not internal ids. */
@@ -216,7 +227,9 @@ export function parseRoomLine(line: string): Room | null {
     if (!dimMatch) return null;
     const width = parseInt(dimMatch[1], 10);
     const height = parseInt(dimMatch[2], 10);
-    const tail = (dimMatch[3] ?? "").trim();
+    // Optional `"Note|Text"` label: links the room to a note and/or renames it on
+    // the map. Exits keep referring to the bare name.
+    const { quoted, rest: tail } = extractQuoted((dimMatch[3] ?? "").trim());
     const exits = createEmptyExits();
     const tokens = tail.split(/\s+(?=[nsew](?:[-=]|\[))/i).filter(Boolean);
     for (const token of tokens) {
@@ -244,7 +257,13 @@ export function parseRoomLine(line: string): Room | null {
                 ? "objective"
                 : "normal";
     const id = name.replace(/\s+/g, "_");
-    return { id, name, width, height, type, exits };
+    const room: Room = { id, name, width, height, type, exits };
+    if (quoted !== null) {
+        const { linkTarget, display } = parseLinkedLabel(quoted);
+        if (display.length > 0) room.display = display;
+        if (linkTarget) room.linkTarget = linkTarget;
+    }
+    return room;
 }
 
 /** Parse full dungeon text into rooms. */

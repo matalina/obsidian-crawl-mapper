@@ -38,12 +38,13 @@ option coordinates-format {X}.{Y}
 0101 forest-bg forest "Old Wood"
 0102 swamp-bg swamp dangerous
 0103 red-500 lair overlay-0-1 "Dragon"
-0101-0103 trail "Hunters' path"
+0101-0103 trail "Hunting Grounds|Hunters' path"
 ```
 ````
 
 - **Types** are background colours (`forest-bg`, `red-500`), icons from the loaded [icon packs](#icon-packs), and modifiers such as `easy`, `rough`, `dangerous` and `level-3` … `level-10`.
 - **Paths** join hexes with `XXYY-XXYY-… type "label"`: `road`, `trail`, `river`, `canyon`, `border`.
+- **Links**: a hex or path label written `"Note|Text"` shows `Text` and opens `Note` when clicked (Ctrl/Cmd-click for a new tab, hover to preview).
 - **Overlays** draw coloured rings: `overlay-<colour>-<ring>` (`faction-…` also works).
 - **Options**: `coordinates-format`, `zoom`, `center-content`, `centered-at`, `horizontal`, `swap-even-odd`, `global`, `icons`.
 
@@ -54,13 +55,13 @@ See [`examples/hexcrawl.md`](examples/hexcrawl.md).
 ````markdown
 ```crawl-mapper
 option map-type dungeon
-Entrance:3x3 n->Hall s->Outside
+Entrance:3x3 "Dungeon Entrance|Front Gate" n->Hall s->Outside
 Hall:1x6 n-[locked]->Vault
 Vault:2x2
 ```
 ````
 
-Rooms are `Name:WxH`, followed by exits: a side (`n`, `e`, `s`, `w`), an optional `[door]` (`open`, `unlocked`, `locked`, `trapped`, `secret`, `reinforced`), and the room it leads to. `=>` draws a reinforced frame. See [`examples/dungeon.md`](examples/dungeon.md).
+Rooms are `Name:WxH`, followed by exits: a side (`n`, `e`, `s`, `w`), an optional `[door]` (`open`, `unlocked`, `locked`, `trapped`, `secret`, `reinforced`), and the room it leads to. `=>` draws a reinforced frame. An optional `"Note|Text"` after the size links the room to a note and shows `Text` on the map (`"Text"` alone just renames it); exits and room types still use the bare name. See [`examples/dungeon.md`](examples/dungeon.md).
 
 ### Pointcrawl
 
@@ -81,11 +82,11 @@ Locations are `Id: "Text"` (optional); connections are `A -[label]- B` or `A -- 
 ````markdown
 ```crawl-mapper
 option map-type city
-Main:5 ns [L Inn Bakery Smithy] [R Tower Watch -]
+Main:5 ns "High Street|Main Street" [L "Prancing Pony|Inn" Bakery Smithy] [R Tower Watch -]
 ```
 ````
 
-Streets are `Name:length axis` (`ns` or `ew`) with the buildings on their left and right sides (`-` leaves a slot empty). Junctions join streets: `@J1 t s->Main e->Market w->Westway`. See [`examples/citycrawl.md`](examples/citycrawl.md).
+Streets are `Name:length axis` (`ns` or `ew`) with the buildings on their left and right sides (`-` leaves a slot empty). Junctions join streets: `@J1 t s->Main e->Market w->Westway`. Streets, buildings and junctions link to notes with `"Note|Text"` — after the street's axis, as a quoted building, or after the junction id; quoted buildings may also contain spaces (`"Old Mill"`). Junction arms keep using the bare street name. See [`examples/citycrawl.md`](examples/citycrawl.md).
 
 ## Icon packs
 

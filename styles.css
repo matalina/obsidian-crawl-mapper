@@ -20,6 +20,19 @@
     text-decoration: none;
 }
 
+/* Dungeon and city labels that link to a note (`"Note|Text"`). Those maps draw
+   fixed light tiles, so a fixed dark accent keeps contrast in every theme. */
+.crawl-mapper-label-link,
+.crawl-mapper-path-label-link {
+    cursor: pointer;
+}
+
+.crawl-mapper-svg .crawl-mapper-label--link {
+    fill: #1d4ed8;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 /* --- Point crawl (map-type point): locations + connections --- */
 
 /* Connection lines: plain, undirected (no arrowheads). */

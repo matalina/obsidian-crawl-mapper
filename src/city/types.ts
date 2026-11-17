@@ -23,11 +23,19 @@ export interface CityJunctionDef {
   id: string;
   kind: CityIntersection;
   arms: Partial<Record<string, string | null>>;
+  /** Map label from an optional `"Note|Text"` after the id. Defaults to `id`. */
+  display?: string;
+  /** Note the junction label links to. */
+  linkTarget?: string | null;
 }
 
 export interface CityStreet {
   id: string;
   name: string;
+  /** Map label from an optional `"Note|Text"` on the street line. Defaults to `name`. */
+  display?: string;
+  /** Note the street label links to. */
+  linkTarget?: string | null;
   length: number;
   axis: CityAxis;
   /** Filled by resolver from `graphEnd` junction kind (placeholder until then). */

@@ -27,11 +27,13 @@ option coordinates-format {X}.{Y}
 
 # --- Streets — Name:length axis [L facade …] [R facade …] -----------
 # axis = ns or ew; length = positive integer; - = blank facade slot.
-Main:5 ns [L Inn Bakery Smithy] [R Tower Watch -]
+# "Note|Text" after the axis links the street; a quoted building
+# ("Note|Text", or "Two Words") links or names that building.
+Main:5 ns "Main Street|Main St" [L "The Prancing Pony|Inn" Bakery Smithy] [R Tower Watch -]
 Market:4 ew [L Stables Pawnshop] [R Tavern - Tannery]
 Westway:3 ew [L Carter] [R Cooper Glazier]
 FarWest:2 ew [L Granary] [R -]
-Pier:3 ew [L -] [R Dock Lighthouse]
+Pier:3 ew [L -] [R Dock "Old Lighthouse"]
 Cobble:2 ns [L Library] [R Garden]
 Lane:3 ew [L Almshouse] [R Apothecary Mason]
 
@@ -39,7 +41,8 @@ Lane:3 ew [L Almshouse] [R Apothecary Mason]
 # kinds: straight (2 opposite arms) | corner (2 perpendicular arms)
 #        t (3 arms, exactly one opposite pair) | cross (1-4 arms)
 #        dead (exactly one street arm)
-@J1 t s->Main e->Market w->Westway
+# @Id "Note|Text" kind … links the junction label (arms use bare street names)
+@J1 "Town Square|Square" t s->Main e->Market w->Westway
 @J2 cross n->Main e->Pier w->Lane s->
 @J3 corner w->Pier s->Cobble
 @J4 dead w->Market
