@@ -20,11 +20,16 @@ option coordinates-format {X}.{Y}
 # Entrance is the BFS root and the only room that may target Outside.
 # Boss is conventionally 5x5; Objective is conventionally 2x2.
 
+# --- Note links (optional) ----------------------------------------
+# Name:WxH "Note|Text" ... — Text is drawn on the map and opens Note
+# when clicked (Ctrl/Cmd-click: new tab; hover: preview). "Text" alone
+# only renames the room. Exits and room types keep using the bare Name.
+
 # --- Entrance + east wing -------------------------------------------
-Entrance:3x3 n->Hall e-[unlocked]->Guardroom s->Outside
+Entrance:3x3 "Dungeon Entrance|Entrance" n->Hall e-[unlocked]->Guardroom s->Outside
 Guardroom:3x3 n-[trapped 3]->Armory
 # [trapped 3] = source-only slot 3 of the N edge (width 3)
-Armory:3x2 e-[open]->StoreRoom
+Armory:3x2 "Armory" e-[open]->StoreRoom
 # [open] = explicit passage glyph (vs bare -> which is a plain frame)
 StoreRoom:2x2
 
@@ -58,7 +63,7 @@ BossHall:3x3 e-[3:5]->Boss
 # receive 5 of Boss W edge. Variants: [:5] receive-only, [3] source-only.
 
 # --- Boss room (5x5 by convention) ----------------------------------
-Boss:5x5
+Boss:5x5 "Boss Lair|Throne Room"
 ```
 
 

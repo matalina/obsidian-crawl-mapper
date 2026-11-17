@@ -5,6 +5,7 @@
 
 import type { CityIntersection, CityJunctionDef, CityStartAnchor, CityStreet } from './types';
 import { resolveCityJunctionAttachments } from './junction-resolve';
+import { extractQuoted, parseLinkedLabel, quoteIfNeeded, tokenizeQuoted } from '../label-link';
 
 const JUNCTION_KINDS = new Set<CityIntersection>(['cross', 't', 'straight', 'corner', 'dead']);
 
@@ -67,7 +68,8 @@ function parseFacadeBrackets(line: string): { left: string[]; right: string[]; r
   while ((m = bracketRe.exec(line)) !== null) {
     const side = m[1].toUpperCase();
     const inner = m[2].trim();
-    const parts = inner.length ? tokenizeLine(inner) : [];
+    // Quoted buildings may hold spaces or a `"Note|Text"` link.
+    const parts = inner.length ? tokenizeQuoted(inner) : [];
     if (side === 'L') {
       left.push(...parts);
     } else {
@@ -152,7 +154,8 @@ export function parseJunctionLine(line: string): CityJunctionDef | null {
   if (!m) return null;
 
   const id = m[1];
-  const body = m[2].trim();
+  // Optional `"Note|Text"` label right after the id.
+  const { quoted, rest: body } = extractQuoted(m[2].trim());
   if (/^[A-Za-z_][A-Za-z0-9_]*\s*:\s*\d/.test(body)) return null;
 
   const tokens = tokenizeLine(body);
@@ -176,7 +179,24 @@ export function parseJunctionLine(line: string): CityJunctionDef | null {
   if (Object.keys(arms).length === 0) return null;
   if (!validateJunctionKindAgainstArms(kind, arms)) return null;
 
-  return { id, kind, arms };
+  return { id, kind, arms, ...linkedLabelFields(quoted) };
+}
+
+/** `display` / `linkTarget` fields from an optional quoted `"Note|Text"`; empty when absent. */
+function linkedLabelFields(quoted: string | null): { display?: string; linkTarget?: string } {
+  if (quoted === null) return {};
+  const { linkTarget, display } = parseLinkedLabel(quoted);
+  return {
+    ...(display.length > 0 ? { display } : {}),
+    ...(linkTarget ? { linkTarget } : {}),
+  };
+}
+
+/** `"Note|Text"` / `"Text"` for a labelled item, or "" when it shows its plain name. */
+function serializeLinkedLabel(name: string, display?: string, linkTarget?: string | null): string {
+  if (linkTarget) return `"${linkTarget}|${display ?? name}"`;
+  if (display != null && display !== name) return `"${display}"`;
+  return '';
 }
 
 /** True if trimmed line is a junction line (`@Mid n->…`), not `@Gate Home:…`. */
@@ -199,7 +219,9 @@ export function parseStreetLine(line: string): CityStreet | null {
   if (!name) return null;
 
   const after = trimmed.slice(colonIdx + 1).trim();
-  const { left, right, restLine } = parseFacadeBrackets(after);
+  const { left, right, restLine: withLabel } = parseFacadeBrackets(after);
+  // Optional `"Note|Text"` street label (outside the facade brackets).
+  const { quoted, rest: restLine } = extractQuoted(withLabel);
   const tokens = tokenizeLine(restLine);
   if (tokens.length !== 2) return null;
 
@@ -220,17 +242,22 @@ export function parseStreetLine(line: string): CityStreet | null {
     endKind: 'straight',
     leftFacades: left,
     rightFacades: right,
+    ...linkedLabelFields(quoted),
   };
 }
 
 /** Serialize street line (junction graph only; no end kind on line). */
 export function serializeStreet(street: CityStreet): string {
   let s = `${street.name}:${street.length} ${street.axis}`;
+  const label = serializeLinkedLabel(street.name, street.display, street.linkTarget);
+  if (label) {
+    s += ` ${label}`;
+  }
   if (street.leftFacades.length) {
-    s += ` [L ${street.leftFacades.join(' ')}]`;
+    s += ` [L ${street.leftFacades.map(quoteIfNeeded).join(' ')}]`;
   }
   if (street.rightFacades.length) {
-    s += ` [R ${street.rightFacades.join(' ')}]`;
+    s += ` [R ${street.rightFacades.map(quoteIfNeeded).join(' ')}]`;
   }
   return s.trim();
 }

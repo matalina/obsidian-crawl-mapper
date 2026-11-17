@@ -546,4 +546,53 @@ const layLoose = translateCityLayoutForBoundary(layBoundary, { w: 40, h: 40 }, r
 assert.equal(detectOutOfBoundsRoadCells(layLoose, { w: 40, h: 40 }).length, 0, 'large boundary should not flag OOB');
 assert.equal(boundaryClipHighlightCells(layLoose, { w: 40, h: 40 }).length, 0);
 
+// --- "Note|Text" links: streets, buildings, junctions ---
+const plainStreet = parseStreetLine('Main:5 ns [L Inn Bakery] [R Tower -]')!;
+assert.equal(plainStreet.display, undefined);
+assert.equal(plainStreet.linkTarget, undefined);
+assert.equal(serializeStreet(plainStreet), 'Main:5 ns [L Inn Bakery] [R Tower -]');
+
+const linkedStreet = parseStreetLine('Main:5 ns "High Street|Main Street" [L "Prancing Pony|Inn" "Old Mill" Bakery] [R -]')!;
+assert.ok(linkedStreet);
+assert.equal(linkedStreet.id, 'Main', 'id still comes from the bare name');
+assert.equal(linkedStreet.axis, 'ns');
+assert.equal(linkedStreet.length, 5);
+assert.equal(linkedStreet.display, 'Main Street');
+assert.equal(linkedStreet.linkTarget, 'High Street');
+assert.deepEqual(linkedStreet.leftFacades, ['Prancing Pony|Inn', 'Old Mill', 'Bakery']);
+assert.deepEqual(linkedStreet.rightFacades, ['-']);
+const linkedSer = serializeStreet(linkedStreet);
+assert.equal(linkedSer, 'Main:5 ns "High Street|Main Street" [L "Prancing Pony|Inn" "Old Mill" Bakery] [R -]');
+assert.deepEqual(parseStreetLine(linkedSer), linkedStreet);
+
+// The label may sit before the axis too.
+const labelFirst = parseStreetLine('Market:4 "Market Row" ew')!;
+assert.equal(labelFirst.axis, 'ew');
+assert.equal(labelFirst.display, 'Market Row');
+assert.equal(labelFirst.linkTarget, undefined);
+
+const plainJ = parseJunctionLine('@J1 t s->Main e->Market w->Westway')!;
+assert.equal(plainJ.display, undefined);
+assert.equal(plainJ.linkTarget, undefined);
+
+const linkedJ = parseJunctionLine('@J1 "Town Square|Square" t s->Main e->Market w->Westway')!;
+assert.ok(linkedJ);
+assert.equal(linkedJ.id, 'J1');
+assert.equal(linkedJ.kind, 't');
+assert.deepEqual(linkedJ.arms, { s: 'Main', e: 'Market', w: 'Westway' });
+assert.equal(linkedJ.display, 'Square');
+assert.equal(linkedJ.linkTarget, 'Town Square');
+
+// A linked junction still lays out like the plain one.
+const linkedCity = parseCityWithStartAnchor(`
+@J "Crossroads|X" straight s->Home n->B
+Home:2 ns "Home Street|Home"
+B:3 ew [L "The Forge|Smithy"]
+`);
+const linkedLay = computeCityLayout(linkedCity.streets, 'bottom', linkedCity.junctions);
+assert.equal(linkedLay.placementError, null);
+assert.equal(linkedLay.segments.length, 2);
+assert.ok(linkedLay.junctions.some((j) => j.label === 'J'), 'layout keeps labelling junctions by id');
+assert.ok(linkedLay.facadeLabels.some((f) => f.text === 'The Forge|Smithy'));
+
 console.log('city notation tests passed');

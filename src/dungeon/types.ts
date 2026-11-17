@@ -40,6 +40,10 @@ export type RoomType = "entrance" | "normal" | "boss" | "objective";
 export interface Room {
     id: string;
     name: string;
+    /** Label drawn on the map, from an optional `"Note|Text"` after the size. Defaults to `name`. */
+    display?: string;
+    /** Note the label links to, from `"Note|Text"`. */
+    linkTarget?: string | null;
     width: number;
     height: number;
     type: RoomType;

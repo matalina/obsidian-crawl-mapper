@@ -1,5 +1,6 @@
 import { SVGElement, SvgAttributes } from "./constants";
 import { Point, Orientation } from "./orientation";
+import { linkContainer, parseLinkedLabel } from "../label-link";
 
 export class Spline {
     // types (required in SPLINE_REGEX) and id are set by TextMapperParser;
@@ -258,6 +259,9 @@ export class Spline {
             pathAttributes["startOffset"] = this.start;
         }
 
+        // `"Note|Text"` links the label to a note, like hex-region labels.
+        const { linkTarget, display } = parseLinkedLabel(this.label);
+
         const gEl = svgEl.createSvg("g");
         const glowEl = gEl.createSvg("text", {
             attr: {
@@ -268,12 +272,13 @@ export class Spline {
         const glowPathEl = glowEl.createSvg("textPath", {
             attr: pathAttributes,
         });
-        glowPathEl.textContent = this.label;
+        glowPathEl.textContent = display;
 
-        const labelEl = gEl.createSvg("text", { attr: labelAttributes });
+        const labelParent = linkContainer(gEl, linkTarget, "crawl-mapper-path-label-link");
+        const labelEl = labelParent.createSvg("text", { attr: labelAttributes });
         const labelPathEl = labelEl.createSvg("textPath", {
             attr: pathAttributes,
         });
-        labelPathEl.textContent = this.label;
+        labelPathEl.textContent = display;
     }
 }

@@ -24,7 +24,8 @@ option center-content
 0206 mountain-bg mountain "mountain"
 0207 island-bg island "island"
 
-0301 forest-bg settlement "settlement"
+# "Note|Text" labels show Text and open Note on click (hex and path labels)
+0301 forest-bg settlement "Settlements|settlement"
 0302 forest-bg dungeon "dungeon"
 0303 forest-bg lair "lair"
 
@@ -52,7 +53,7 @@ option center-content
 0709 ghost "9,10"
 0708 ghost "11,12"
 
-0601-0801 road "road"
+0601-0801 road "Roads|road"
 0602-0802 trail "trail"
 0603-0803 river "river"
 0604-0804 canyon
